@@ -12,7 +12,7 @@ namespace Regent
         {
             var game = new Game();
             game.Start();
-            while (true)
+            while (game.Active)
             {
                 game.Step();
             }

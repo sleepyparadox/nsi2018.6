@@ -49,6 +49,9 @@
     <Compile Include="Cards\AgentCard.cs" />
     <Compile Include="Cards\ICard.cs" />
     <Compile Include="Cards\Deck.cs" />
+    <Compile Include="Cards\ItemCard.cs" />
+    <Compile Include="Dice\Dice.cs" />
+    <Compile Include="Dice\DieResult.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Grammars\Grammar.cs" />
     <Compile Include="Grammars\Grammars.cs" />

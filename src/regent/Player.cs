@@ -9,16 +9,16 @@ namespace Regent
 {
     public class Player
     {
-        public readonly bool IsPlayer;
+        public readonly bool IsHuman;
         public List<ICard> Cards;
-        public bool Lost { get { return GetAgent() == null; } }
+        public bool Active { get { return GetAgent() != null; } }
 
         public Player(bool isPlayer)
         {
-            IsPlayer = isPlayer;
+            IsHuman = isPlayer;
             Cards = new List<ICard>()
             {
-                new AgentCard()
+                new AgentCard(true)
             };
         }
 
@@ -29,11 +29,20 @@ namespace Regent
 
         public override string ToString()
         {
+            return IsHuman ? (GetAgentString() + " (HUMAN)") : GetAgentString();
+        }
+
+        string GetAgentString()
+        {
             var agent = GetAgent();
             if (agent != null)
+            {
                 return agent.ToString();
+            }
             else
+            {
                 return "(DEAD)";
+            }
         }
     }
 }

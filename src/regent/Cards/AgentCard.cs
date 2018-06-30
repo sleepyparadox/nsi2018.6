@@ -11,13 +11,19 @@ namespace Regent.Cards
         public string Name { get; set; }
         public int Level { get; set; }
 
-        public AgentCard()
-        {
-            var highborn = Game.Rand.NextBool();
+        public int Advantage { get; set; }
 
-            Name = Game.Grammars.Write("agent.name");
-            Level = Game.Rand.Next(0, 10);
+        static readonly int[] LowbornRange = new int[] { 1, 5 };
+        static readonly int[] HighbornRange = new int[] { 6, 10 };
+
+        public AgentCard(bool highborn)
+        {
+            Name = Game.Grammars.Write(highborn ? "agent.name.highborn": "agent.name.lowborn");
+            var range = (highborn ? HighbornRange : LowbornRange);
+            Level = Game.Rand.Next(range[0], range[1]);
         }
+
+
 
         public override string ToString()
         {

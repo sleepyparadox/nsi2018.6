@@ -13,6 +13,11 @@ namespace System
             return rand.Next(0, 100) >= 50;
         }
 
+        public static int NextPercent(this Random rand)
+        {
+            return NextInt(rand, 0, 100);
+        }
+
         public static int NextInt(this Random rand, int min = 0, int max = int.MaxValue)
         {
             return rand.Next(min, max);

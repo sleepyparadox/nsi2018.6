@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Regent.Cards
 {
-    public class Deck
+    public class ItemCard : ICard
     {
-        public ICard DrawCard()
-        {
-            var highborn = Game.Rand.NextInt(0, 100) >= 80;
+        public string Name { get; set; }
 
-            return new AgentCard(highborn);
+        public ItemCard()
+        {
+            Name = Game.Grammars.Write("weapon");
         }
     }
 }
