@@ -17,6 +17,8 @@ namespace Regent
         public static Grammars Grammars;
 
         public static List<PlayerMove> Moves;
+        static bool LoggingEnabled = false;
+        static int LogDelayMs = 500;
 
         public bool Active { get { return Players.Values.Count(p => p.Active) > 1; } }
 
@@ -35,8 +37,7 @@ namespace Regent
                 { Chamber.Red, new Player(Chamber.Red, true) },
             };
 
-
-            Console.Clear();
+            LoggingEnabled = true;
             Log("You are playing as {0}", Players.Values.FirstOrDefault(p => p.IsHuman));
             Log("You must defeat {0}", Players.Values.Where(p => p.IsHuman == false).ToList());
             Log();
@@ -53,7 +54,6 @@ namespace Regent
             {
                 Moves.Add(StepMainPhase(player));
                 Log();
-                System.Threading.Thread.Sleep(1000);
             }
 
             LogLaterThatNight();
@@ -65,7 +65,6 @@ namespace Regent
                 if(ResolveEvents(@event))
                 {
                     Log();
-                    System.Threading.Thread.Sleep(1000);
                     // this card is done
                     events.Remove(@event);
                 }
@@ -87,7 +86,6 @@ namespace Regent
 
                 ResolveAttack(allAttackers);
                 Log();
-                System.Threading.Thread.Sleep(1000);
             }
 
             if (Active == false)
@@ -358,6 +356,9 @@ namespace Regent
 
         public static void Log(string msg, params object[] args)
         {
+            if (LoggingEnabled == false)
+                return;
+
             for (int i = 0; i < args.Length; i++)
             {
                 if(args[i] is IEnumerable)
@@ -377,15 +378,17 @@ namespace Regent
             }
 
             Console.WriteLine(msg, args);
+            System.Threading.Thread.Sleep(LogDelayMs);
         }
 
         void LogLaterThatNight()
         {
             Console.Write("Later that night");
+            System.Threading.Thread.Sleep(LogDelayMs);
             for (int i = 0; i < 3; i++)
             {
                 Console.Write(".");
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(LogDelayMs/3);
             }
             Console.WriteLine();
             Console.WriteLine();
