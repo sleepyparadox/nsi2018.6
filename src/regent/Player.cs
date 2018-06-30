@@ -29,17 +29,17 @@ namespace Regent
             };
             Hand = new List<ICard>()
             {
-                Game.Deck.DrawCard(),
-                Game.Deck.DrawCard(),
-                Game.Deck.DrawCard(),
-                Game.Deck.DrawCard(),
+                Game.Deck.DrawCard(this),
+                Game.Deck.DrawCard(this),
+                Game.Deck.DrawCard(this),
+                Game.Deck.DrawCard(this),
             };
             Discards = new List<ICard>();
         }
 
         public override string ToString()
         {
-            return Chamber + (IsHuman ? " (human)" : " (cpu)");
+            return Chamber.ToString();
         }
     }
 }

@@ -8,11 +8,11 @@ namespace Regent
 {
     public enum DieResult
     {
-        Kill,
-        AllKill,
+        KillTarget,
+        EveryoneDies,
         InspireFear,
         RaiseSuspicion,
         DropItem,
-        Caught,
+        GetHanged,
     }
 }

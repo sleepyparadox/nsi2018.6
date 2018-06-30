@@ -8,19 +8,32 @@ namespace Regent.Cards
 {
     public class Deck
     {
-        public ICard DrawCard()
+        public ICard DrawCard(Player player)
         {
             var cardType = Game.Rand.NextInt(0, 100);
 
+            ICard card;
             if(cardType < 40)
             {
                 var highborn = Game.Rand.NextInt(0, 100) >= 80;
-                return new AgentCard(highborn);
+                card = new AgentCard(highborn);
             }
             else
             {
-                return new WeaponCard();
+                card = new WeaponCard();
             }
+
+
+            if(player.IsHuman)
+            {
+                Game.Log("{0} draws {1}", player, card);
+            }
+            else
+            {
+                Game.Log("{0} draws a card", player);
+            }
+
+            return card;
         }
     }
 }

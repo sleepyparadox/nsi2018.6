@@ -10,7 +10,6 @@ namespace Regent.Cards
     {
         public string Name { get; set; }
         public int Power { get; set; }
-        public int Level { get; set; }
         public int Intrigue { get; set; }
         public bool Tapped { get; set; }
 
@@ -27,7 +26,7 @@ namespace Regent.Cards
 
         public override string ToString()
         {
-            return Name;
+            return string.Format("{0} ({1} +{2} intrigue)", Name, Game.GetOwner(this), Intrigue);
         }
     }
 }

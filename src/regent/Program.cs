@@ -12,10 +12,13 @@ namespace Regent
         {
             var game = new Game();
             game.Start();
+            Console.Clear();
             while (game.Active)
             {
                 game.Step();
             }
+
+            Console.ReadLine();
         }
     }
 }

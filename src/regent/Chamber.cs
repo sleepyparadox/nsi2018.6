@@ -9,9 +9,9 @@ namespace Regent
     public enum Chamber
     {
         Court,
-        RedChamber,
-        BlueChamber,
-        GreenChamber,
-        YellowChamber,
+        Red,
+        Blue,
+        Green,
+        Yellow,
     }
 }

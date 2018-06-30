@@ -20,7 +20,7 @@ namespace Regent.Cards
 
         public override string ToString()
         {
-            return Name;
+            return string.Format("{0} ({1} +{2} intrigue)", Name, Game.GetOwner(this), Intrigue);
         }
     }
 }

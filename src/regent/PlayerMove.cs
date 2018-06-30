@@ -13,5 +13,22 @@ namespace Regent
         public AgentCard Agent;
         public ICard FacedownCard;
         public Chamber Chamber;
+
+        public int GetIntrigue()
+        {
+            var weapon = FacedownCard as IWeapon;
+
+            return Agent.Intrigue + (weapon != null ? weapon.Intrigue : 0);
+        }
+
+        public override string ToString()
+        {
+            if(FacedownCard is IWeapon)
+            {
+                return string.Format("{0} with {1} ({2} +{3} Intrigue)", Agent.Name, FacedownCard.Name, Player.Chamber, GetIntrigue());
+            }
+
+            return base.ToString();
+        }
     }
 }
