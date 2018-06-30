@@ -9,40 +9,37 @@ namespace Regent
 {
     public class Player
     {
+        public Chamber Chamber;
         public readonly bool IsHuman;
-        public List<ICard> Cards;
-        public bool Active { get { return GetAgent() != null; } }
+        public List<AgentCard> AgentsCards;
+        public List<ICard> Hand;
+        public List<ICard> Discards;
 
-        public Player(bool isPlayer)
+        public int Power { get { return Discards.Sum(c => (c is AgentCard) ? (c as AgentCard).Power : 0); } }
+        public bool Active { get { return AgentsCards.Any(); } }
+
+        public Player(Chamber chamber, bool isPlayer)
         {
+            Chamber = chamber;
             IsHuman = isPlayer;
-            Cards = new List<ICard>()
+            AgentsCards = new List<AgentCard>()
             {
-                new AgentCard(true)
+                new AgentCard(true),
+                new AgentCard(false),
             };
-        }
-
-        public AgentCard GetAgent()
-        {
-            return Cards.FirstOrDefault(c => c is AgentCard) as AgentCard;
+            Hand = new List<ICard>()
+            {
+                Game.Deck.DrawCard(),
+                Game.Deck.DrawCard(),
+                Game.Deck.DrawCard(),
+                Game.Deck.DrawCard(),
+            };
+            Discards = new List<ICard>();
         }
 
         public override string ToString()
         {
-            return IsHuman ? (GetAgentString() + " (HUMAN)") : GetAgentString();
-        }
-
-        string GetAgentString()
-        {
-            var agent = GetAgent();
-            if (agent != null)
-            {
-                return agent.ToString();
-            }
-            else
-            {
-                return "(DEAD)";
-            }
+            return Chamber + (IsHuman ? " (human)" : " (cpu)");
         }
     }
 }

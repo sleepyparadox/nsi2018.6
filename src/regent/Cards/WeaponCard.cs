@@ -6,13 +6,21 @@ using System.Threading.Tasks;
 
 namespace Regent.Cards
 {
-    public class ItemCard : ICard
+    public class WeaponCard : ICard, IWeapon
     {
         public string Name { get; set; }
+        public int Intrigue { get; set; }
 
-        public ItemCard()
+        public WeaponCard()
         {
             Name = Game.Grammars.Write("weapon");
+
+            Intrigue = Game.Rand.NextInt(1, 5);
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

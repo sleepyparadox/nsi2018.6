@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace Regent.Cards
 {
-    public class AgentCard : ICard
+    public class AgentCard : ICard, IWeapon
     {
         public string Name { get; set; }
+        public int Power { get; set; }
         public int Level { get; set; }
-
-        public int Advantage { get; set; }
+        public int Intrigue { get; set; }
+        public bool Tapped { get; set; }
 
         static readonly int[] LowbornRange = new int[] { 1, 5 };
         static readonly int[] HighbornRange = new int[] { 6, 10 };
@@ -19,11 +20,10 @@ namespace Regent.Cards
         public AgentCard(bool highborn)
         {
             Name = Game.Grammars.Write(highborn ? "agent.name.highborn": "agent.name.lowborn");
+            Power = Game.Rand.Next(1, 5);
             var range = (highborn ? HighbornRange : LowbornRange);
-            Level = Game.Rand.Next(range[0], range[1]);
+            Intrigue = Game.Rand.Next(range.Min(), range.Max());
         }
-
-
 
         public override string ToString()
         {

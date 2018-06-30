@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace Regent
 {
-    public enum DieResult
+    public enum Chamber
     {
-        Kill,
-        AllKill,
-        InspireFear,
-        RaiseSuspicion,
-        DropItem,
-        Caught,
+        Court,
+        RedChamber,
+        BlueChamber,
+        GreenChamber,
+        YellowChamber,
     }
 }

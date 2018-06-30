@@ -11,68 +11,111 @@ namespace Regent
     {
         public static Random Rand;
         public static Deck Deck;
-        public static List<Player> Players;
+        public static Dictionary<Chamber, Player> Players;
         public static Grammars Grammars;
-        public bool Active { get { return Players.Any(p => p.IsHuman && p.Active); } }
+
+        public bool Active { get { return Players.Values.Any(p => p.IsHuman && p.Active); } }
 
         public void Start()
         {
             Rand = new Random();
             Deck = new Deck();
-            Players = new List<Player>();
+            Players = new Dictionary<Chamber, Player>();
             Grammars = new Grammars("Grammars/Grammars.txt");
 
-            Players = new List<Player>()
+            Players = new Dictionary<Chamber, Player>()
             {
-                new Player(true),
-                new Player(false),
-                new Player(false),
+                { Chamber.BlueChamber, new Player(Chamber.BlueChamber, true) },
+                { Chamber.GreenChamber, new Player(Chamber.GreenChamber, false) },
+                { Chamber.RedChamber, new Player(Chamber.RedChamber, false) },
             };
 
             Log("New game starring:");
             foreach (var player in Players)
             {
-                Log(player);
+                Log("New player {0}", player);
             }
         }
 
         public void Step()
         {
-            foreach(var player in Players.Where(p => p.Active))
+            var moves = new List<PlayerMove>();
+            foreach(var player in Players.Values.Where(p => p.Active))
             {
-                StepPlayer(player);
-                Console.ReadLine();
+                moves.Add(StepMainPhase(player));
             }
 
-            if(Active == false)
+            foreach (var move in moves)
+            {
+                ResolveEvents(move);
+            }
+
+            foreach (var move in moves)
+            {
+                ResolveMove(move);
+            }
+
+            if (Active == false)
             {
                 // Game over
                 Log("Game over");
             }
         }
 
-        static void StepPlayer(Player player)
+        static PlayerMove StepMainPhase(Player player)
         {
-            var faceup = Deck.DrawCard();
-            //Log("{0} drew {1}", player, faceup);
+            var chambers = Players.Keys.ToList();
+            chambers.Insert(0, Chamber.Court);
+            chambers.Remove(player.Chamber);
 
-            if(faceup is AgentCard)
-            {
-                Fight(null, faceup as AgentCard, player);
-            }
+            var facedown = Deck.DrawCard();
+            player.Hand.Add(facedown);
+
+            var move = new PlayerMove();
+            move.Player = player;
+            move.Agent = Controls.ChooseOne(player.AgentsCards, player.IsHuman, "Choose an agent:");
+            move.FacedownCard = Controls.ChooseOne<ICard>(player.Hand, player.IsHuman, "Choose an accomplice:");
+            move.Chamber = Controls.ChooseOne(chambers, player.IsHuman, "Select a chamber to infiltrate:");
+
+            return move;
         }
 
-        static void Fight(Player attackingPlayer, AgentCard attackingAgent, Player defendingPlayer)
+        public static void ResolveEvents(PlayerMove move)
         {
-            Log("{0} tries to assissate {1}", attackingAgent, defendingPlayer);
-            var defendingAgent = defendingPlayer.GetAgent();
+
+        }
+
+        public static void ResolveMove(PlayerMove move)
+        {
+            if(move.Chamber == Chamber.Court)
+            {
+                Log("{0} trades in {1}", move.Agent, move.FacedownCard);
+                Discard(move.FacedownCard);
+                move.Player.Hand.Add(Deck.DrawCard());
+                move.Player.Hand.Add(Deck.DrawCard());
+                return;
+            }
+
+            var weapon = move.FacedownCard as IWeapon;
+            if (weapon == null)
+                return;
+
+            var defendingPlayer = Players[move.Chamber];
+            Fight(move, move.Player, move.Agent, defendingPlayer);
+            Discard(move.FacedownCard);
+        }
+
+        static void Fight(PlayerMove move, Player attackingPlayer, AgentCard attackingAgent, Player defendingPlayer)
+        {
+            Log("{0} tries to assassinate {1}", attackingAgent, defendingPlayer);
+            var defendingAgent = defendingPlayer.AgentsCards.Last();
 
             DieResult result;
             if (attackingAgent.Level > defendingAgent.Level
                     && attackingPlayer != null && attackingPlayer.IsHuman)
             {
                 // Attacker Choice (human)
-                result = GetChoice(Dice.Roll(), Dice.Roll());
+                result = Controls.ChooseOne(new[] { Dice.Roll(), Dice.Roll() }, true);
             }
             else if (attackingAgent.Level > defendingAgent.Level)
             {
@@ -83,7 +126,7 @@ namespace Regent
                     && defendingPlayer != null && defendingPlayer.IsHuman)
             {
                 // Defender Choice (human)
-                result = GetChoice(Dice.Roll(), Dice.Roll());
+                result = Controls.ChooseOne(new[] { Dice.Roll(), Dice.Roll() }, true);
             }
             else if (defendingAgent.Level > attackingAgent.Level)
             {
@@ -96,74 +139,36 @@ namespace Regent
                 result = Dice.Roll();
             }
 
-            if (result == DieResult.Assassinate)
+            if (result == DieResult.Kill)
+            {
                 Discard(defendingAgent);
-            else if (result == DieResult.Advantage)
-                defendingAgent.Advantage = -10;
-            else if (result == DieResult.TakeItem)
-                StealItem(attackingPlayer, defendingPlayer);
-            else if (result == DieResult.CriticalFailure)
+            }
+            else if (result == DieResult.AllKill)
+            {
+                Discard(defendingAgent);
                 Discard(attackingAgent);
-            else if (result == DieResult.Disadvantage)
-                attackingAgent.Advantage = -10;
+            }
+            else if (result == DieResult.InspireFear)
+            {
+                defendingAgent.Tapped = true;
+            }
+            else if(result == DieResult.RaiseSuspicion)
+            {
+                attackingAgent.Tapped = true;
+            }
             else if (result == DieResult.DropItem)
-                StealItem(defendingPlayer, attackingPlayer);
+            {
+                Discard(move.FacedownCard);
+            }
+            else if(result == DieResult.Caught)
+            {
+                Discard(attackingAgent);
+            }
             else
+            {
+                // unknown result
                 throw new NotImplementedException(result.ToString());
-
-        }
-
-        static void StealItem(Player attacker, Player defender)
-        {
-            ItemCard item;
-            if(defender == null)
-            {
-                item = new ItemCard();
             }
-            else
-            {
-                item = defender.Cards.FirstOrDefault(c => c is ItemCard) as ItemCard;
-                if (item != null)
-                    defender.Cards.Remove(item);
-                else
-                    item = new ItemCard();
-            }
-
-            if(attacker == null)
-            {
-                Discard(item);
-            }
-            else
-            {
-                attacker.Cards.Add(item);
-            }
-            Log("{0} was stolen", item);
-        }
-
-        static DieResult GetChoice(DieResult zChoice, DieResult xChoice)
-        {
-            // no brainer choices
-            if (zChoice == DieResult.Assassinate || (zChoice > 0 && xChoice < 0))
-                return zChoice;
-            if (xChoice == DieResult.Assassinate || (xChoice > 0 && zChoice < 0))
-                return xChoice;
-
-            Console.WriteLine("Choose:");
-            Console.WriteLine("[z] {0}", zChoice);
-            Console.WriteLine("[x] {0}", xChoice);
-            ConsoleKeyInfo key;
-            do
-            {
-                key = Console.ReadKey();
-            }
-            while (key.Key != ConsoleKey.Z && key.Key != ConsoleKey.X);
-
-            if (key.Key == ConsoleKey.Z)
-                return zChoice;
-            else if (key.Key == ConsoleKey.X)
-                return xChoice;
-            else
-                throw new Exception();
         }
 
         static void Discard(ICard card, bool silent = false)
@@ -173,11 +178,15 @@ namespace Regent
                 Log("{0} was discarded", card);
             }
 
-            foreach(var player in Players)
+            foreach(var player in Players.Values)
             {
-                if(player.Cards.Contains(card))
+                if(player.AgentsCards.Contains(card))
                 {
-                    player.Cards.Remove(card);
+                    player.AgentsCards.Remove(card as AgentCard);
+                }
+                if(player.Hand.Contains(card))
+                {
+                    player.Hand.Remove(card);
                 }
             }
         }

@@ -46,16 +46,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls.cs" />
+    <Compile Include="PlayerMove.cs" />
     <Compile Include="Cards\AgentCard.cs" />
     <Compile Include="Cards\ICard.cs" />
     <Compile Include="Cards\Deck.cs" />
-    <Compile Include="Cards\ItemCard.cs" />
+    <Compile Include="Cards\WeaponCard.cs" />
     <Compile Include="Dice\Dice.cs" />
     <Compile Include="Dice\DieResult.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Grammars\Grammar.cs" />
     <Compile Include="Grammars\Grammars.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="Chamber.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\RandomUtility.cs" />

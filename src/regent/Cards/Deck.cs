@@ -10,9 +10,17 @@ namespace Regent.Cards
     {
         public ICard DrawCard()
         {
-            var highborn = Game.Rand.NextInt(0, 100) >= 80;
+            var cardType = Game.Rand.NextInt(0, 100);
 
-            return new AgentCard(highborn);
+            if(cardType < 40)
+            {
+                var highborn = Game.Rand.NextInt(0, 100) >= 80;
+                return new AgentCard(highborn);
+            }
+            else
+            {
+                return new WeaponCard();
+            }
         }
     }
 }

@@ -10,4 +10,14 @@ namespace Regent.Cards
     {
         string Name { get; set; }
     }
+
+    public interface ICardEvent : ICard
+    {
+
+    }
+
+    public interface IWeapon : ICard
+    {
+        int Intrigue { get; set; }
+    }
 }
