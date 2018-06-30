@@ -11,18 +11,18 @@ namespace Regent
     {
         public Chamber Chamber;
         public readonly bool IsHuman;
-        public List<AgentCard> AgentsCards;
+        public List<AgentCard> Agents;
         public List<ICard> Hand;
         public List<ICard> Discards;
 
         public int Power { get { return Discards.Sum(c => (c is AgentCard) ? (c as AgentCard).Power : 0); } }
-        public bool Active { get { return AgentsCards.Any(); } }
+        public bool Active { get { return Agents.Any(); } }
 
         public Player(Chamber chamber, bool isPlayer)
         {
             Chamber = chamber;
             IsHuman = isPlayer;
-            AgentsCards = new List<AgentCard>()
+            Agents = new List<AgentCard>()
             {
                 new AgentCard(true),
                 new AgentCard(false),

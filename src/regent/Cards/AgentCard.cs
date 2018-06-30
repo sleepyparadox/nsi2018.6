@@ -26,7 +26,16 @@ namespace Regent.Cards
 
         public override string ToString()
         {
-            return string.Format("{0} ({1} +{2} intrigue)", Name, Game.GetOwner(this), Intrigue);
+            var owner = Game.GetOwner(this);
+            if(owner == null)
+                return string.Format("{0} (dead)", Name);
+            else
+                return string.Format("{0} ({1} +{2} intrigue)", Name, owner, Intrigue);
+        }
+
+        public bool GetIsUsed()
+        {
+            return Game.Moves.Any(m => m.Agent == this);
         }
     }
 }

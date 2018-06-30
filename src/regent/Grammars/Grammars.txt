@@ -6,6 +6,21 @@
 #agent.name.common.male the #profession.male
 #agent.name.common.female the #profession.female
 
+{"_id": "weapon"}
+#race|material|chemical|theme|weapon #weapon.base
+
+{"_id": "weapon.base"}
+Sword
+Axe
+Shield
+Bow
+Armour
+Knife
+Pie
+Pot
+Lute
+
+
 {"_id": "profession.male"}
 Manservent
 Bard
@@ -76,7 +91,6 @@ Demon
 Angel
 Ghost
 Bat
-Dark #creature
 Gnoll
 Frog
 Lizard
@@ -234,18 +248,6 @@ Heavy
 Gravity
 Civilised
 Rowdy
-
-{"_id": "weapon"}
-Poison
-Sword
-Axe
-Shield
-Bow
-Armour
-Knife
-Pie
-Pot
-Lute
 
 {"_id": "location"}
 Marsh

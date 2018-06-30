@@ -10,15 +10,23 @@ namespace Regent
     {
         static void Main(string[] args)
         {
-            var game = new Game();
-            game.Start();
-            Console.Clear();
-            while (game.Active)
+            while(true)
             {
-                game.Step();
-            }
+                var game = new Game();
+                game.Start();
+                while (game.Active)
+                {
+                    game.Step();
+                }
 
-            Console.ReadLine();
+                string newGame = "New Game";
+                string quit = "Quit";
+
+                var result = Controls.ChooseOne(new string[] { newGame, quit }, true);
+                if (result == quit)
+                    break;
+            }
+            
         }
     }
 }

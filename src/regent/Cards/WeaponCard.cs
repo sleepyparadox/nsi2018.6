@@ -15,7 +15,7 @@ namespace Regent.Cards
         {
             Name = Game.Grammars.Write("weapon");
 
-            Intrigue = Game.Rand.NextInt(1, 5);
+            Intrigue = Game.Rand.NextInt(5, 10);
         }
 
         public override string ToString()

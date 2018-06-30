@@ -10,10 +10,13 @@ namespace Regent
 {
     public class Game
     {
+        public static int Day = 0;
         public static Random Rand;
         public static Deck Deck;
         public static Dictionary<Chamber, Player> Players;
         public static Grammars Grammars;
+
+        public static List<PlayerMove> Moves;
 
         public bool Active { get { return Players.Values.Count(p => p.Active) > 1; } }
 
@@ -23,6 +26,7 @@ namespace Regent
             Deck = new Deck();
             Players = new Dictionary<Chamber, Player>();
             Grammars = new Grammars("Grammars/Grammars.txt");
+            Moves = new List<PlayerMove>();
 
             Players = new Dictionary<Chamber, Player>()
             {
@@ -31,30 +35,39 @@ namespace Regent
                 { Chamber.Red, new Player(Chamber.Red, true) },
             };
 
-            Log("New game starring:");
-            foreach (var player in Players)
-            {
-                Log("New player {0}", player);
-            }
+
+            Console.Clear();
+            Log("You are playing as {0}", Players.Values.FirstOrDefault(p => p.IsHuman));
+            Log("You must defeat {0}", Players.Values.Where(p => p.IsHuman == false).ToList());
+            Log();
         }
 
         public void Step()
         {
-            var moves = new List<PlayerMove>();
+            Day++;
+            Log("Day {0}", Day);
+            Log();
+
+            Moves.Clear();
             foreach(var player in Players.Values.Where(p => p.Active))
             {
-                moves.Add(StepMainPhase(player));
+                Moves.Add(StepMainPhase(player));
                 Log();
+                System.Threading.Thread.Sleep(1000);
             }
 
-            for (int i = 0; i < moves.Count;)
+            LogLaterThatNight();
+
+            var events = Moves.ToList();
+            for (int i = 0; i < events.Count;)
             {
-                var move = moves[i];
-                if(ResolveEvents(move))
+                var @event = events[i];
+                if(ResolveEvents(@event))
                 {
                     Log();
+                    System.Threading.Thread.Sleep(1000);
                     // this card is done
-                    moves.Remove(move);
+                    events.Remove(@event);
                 }
                 else
                 {
@@ -63,16 +76,18 @@ namespace Regent
                 }
 
             }
-            
-            while(moves.Any())
+
+            var combatMoves = Moves.Where(a => a.FacedownCard is IWeapon && a.Chamber != Chamber.Court).ToList();
+            while(combatMoves.Any())
             {
-                var activeMove = moves.First();
-                var allAttackers = moves.Where(m => m.Chamber == activeMove.Chamber).ToList();
+                var activeMove = combatMoves.First();
+                var allAttackers = combatMoves.Where(m => m.Chamber == activeMove.Chamber).ToList();
                 foreach (var attacker in allAttackers)
-                    moves.Remove(attacker);
+                    combatMoves.Remove(attacker);
 
                 ResolveAttack(allAttackers);
                 Log();
+                System.Threading.Thread.Sleep(1000);
             }
 
             if (Active == false)
@@ -100,19 +115,56 @@ namespace Regent
             var facedown = Deck.DrawCard(player);
             player.Hand.Add(facedown);
 
+            // Play agents from hand
+            while(true)
+            {
+                var plot = "Plot";
+                var recruit = string.Format("Recruit from hand ({0})", player.Hand.Where(c => c is AgentCard).Count());
+                var inspectChamber = string.Format("Inspect Chamber ({0})", player.Agents.Count);
+                var inspectHand = string.Format("Inspect Hand ({0})", player.Hand.Count);
+
+                var choices = new[] { plot, recruit, inspectChamber, inspectHand };
+                var choice = Controls.ChooseOne(choices, player.IsHuman);
+
+                if (choice == plot)
+                    break;
+                else if(choice == recruit && player.Hand.Any(c => c is AgentCard))
+                {
+                    var recruitables = player.Hand.Where(c => c is AgentCard).ToList();
+                    var recruited = Controls.ChooseOne(recruitables, player.IsHuman);
+                    player.Hand.Remove(recruited);
+                    player.Agents.Add(recruited as AgentCard);
+                    Log("{0} joined the {1} faction", recruited, player);
+                }
+                else if (choice == inspectChamber && player.IsHuman)
+                {
+                    foreach(var card in player.Agents)
+                    {
+                        Log("Chamber contains {0}", card);
+                    }
+                }
+                else if (choice == inspectHand && player.IsHuman)
+                {
+                    foreach (var card in player.Hand)
+                    {
+                        Log("Hand contains {0}", card);
+                    }
+                }
+            }
+      
+            // Plot
             var move = new PlayerMove();
             move.Player = player;
-            move.Agent = Controls.ChooseOne(player.AgentsCards, player.IsHuman, "Choose an agent:");
+            move.Agent = Controls.ChooseOne(player.Agents, player.IsHuman, "Choose an agent:");
             move.FacedownCard = Controls.ChooseOne(player.Hand, player.IsHuman, "Choose an accomplice:");
             move.Chamber = Controls.ChooseOne(chambers, player.IsHuman, "Select a chamber to infiltrate:");
 
             if(player.IsHuman)
             {
-                Log("{0} moves into position", move.Agent);
+                Log("{0} moves outside {1} armed with {2}", move.Agent, move.Chamber, move.FacedownCard);
             }
             else
             {
-                System.Threading.Thread.Sleep(1000);
                 Log("{0} was seen near {1}", move.Agent, move.Chamber);
             }
 
@@ -141,18 +193,39 @@ namespace Regent
 
             Log("{0} sneak into the {1}", attackers, defendingPlayer);
 
-            if (defendingPlayer.Active == false)
+            var defendingMove = Game.Moves.FirstOrDefault(m => m.Player == defendingPlayer && m.Chamber == defendingPlayer.Chamber);
+            AgentCard defendingAgent;
+            if(defendingMove != null)
+                defendingAgent = defendingMove.Agent;
+            else
+            {
+                
+                defendingAgent = defendingPlayer.Agents.LastOrDefault(a => a.GetIsUsed() == false);
+            }
+
+            if (defendingAgent == null)
             {
                 Log("But {0} was empty", defendingPlayer);
+
+                if(defendingMove != null)
+                {
+                    Log("because {0} is in {1}", defendingMove.Agent, defendingMove.Chamber);
+                }
                 return;
             }
 
             var attackingIntrigue = attackers.Sum(a => a.GetIntrigue());
-
-            var defendingAgent = defendingPlayer.AgentsCards.Last();
-            var defendingIntruge = defendingAgent.Intrigue;
-
-            Log("and find {0}", defendingAgent);
+            int defendingIntruge;
+            if(defendingMove != null)
+            {
+                defendingIntruge = defendingMove.GetIntrigue();
+                Log("and find {0}", defendingMove);
+            }
+            else
+            {
+                defendingIntruge = defendingAgent.Intrigue;
+                Log("and find {0}", defendingAgent);
+            }
 
             DieResult result;
             if (attackingIntrigue > defendingIntruge)
@@ -182,6 +255,9 @@ namespace Regent
                 Log("The attackers succeed");
 
                 Discard(defendingAgent);
+
+                if (defendingMove != null)
+                    Discard(defendingMove.FacedownCard);
             }
             else if (result == DieResult.EveryoneDies)
             {
@@ -193,6 +269,8 @@ namespace Regent
                     Discard(attacker.FacedownCard);
                 }
                 Discard(defendingAgent);
+                if (defendingMove != null)
+                    Discard(defendingMove.FacedownCard);
             }
             else if (result == DieResult.InspireFear)
             {
@@ -243,9 +321,9 @@ namespace Regent
 
             foreach(var player in Players.Values)
             {
-                if(player.AgentsCards.Contains(card))
+                if(player.Agents.Contains(card))
                 {
-                    player.AgentsCards.Remove(card as AgentCard);
+                    player.Agents.Remove(card as AgentCard);
                 }
                 if(player.Hand.Contains(card))
                 {
@@ -258,7 +336,7 @@ namespace Regent
         {
             foreach (var player in Players.Values)
             {
-                if(player.AgentsCards.Contains(card)
+                if(player.Agents.Contains(card)
                     || player.Hand.Contains(card))
                 {
                     return player;
@@ -299,6 +377,18 @@ namespace Regent
             }
 
             Console.WriteLine(msg, args);
+        }
+
+        void LogLaterThatNight()
+        {
+            Console.Write("Later that night");
+            for (int i = 0; i < 3; i++)
+            {
+                Console.Write(".");
+                System.Threading.Thread.Sleep(1000);
+            }
+            Console.WriteLine();
+            Console.WriteLine();
         }
     }
 }
