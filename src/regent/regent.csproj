@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cards\TapReason.cs" />
     <Compile Include="Controls.cs" />
     <Compile Include="InitActions.cs" />
     <Compile Include="PlayerMove.cs" />

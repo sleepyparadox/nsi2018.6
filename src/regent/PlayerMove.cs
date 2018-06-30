@@ -21,6 +21,38 @@ namespace Regent
             return Agent.Intrigue + (weapon != null ? weapon.Intrigue : 0);
         }
 
+        public bool IsAttackMove()
+        {
+            return FacedownCard is IWeapon 
+                && Chamber != Chamber.Court
+                && IsDefendMove() == false;
+        }
+
+        public bool IsDefendMove()
+        {
+            return Chamber == Player.Chamber;
+        }
+
+        public void LogInitialState()
+        {
+            if (Player.IsHuman)
+            {
+                if (IsDefendMove())
+                    Game.Log("(defend) {0} hides inside {1} armed with {2}", Agent, Chamber, FacedownCard);
+                else
+                    Game.Log("(attack) {0} waits outside {1} armed with {2}", Agent, Chamber, FacedownCard);
+            }
+            else
+            {
+                if (IsDefendMove())
+                    Game.Log("{0} was seen retreating to their {1}", Agent, Chamber);
+                else
+                    Game.Log("{0} was seen near {1}", Agent, Chamber);
+            }
+
+            Game.Sleep();
+        }
+
         public override string ToString()
         {
             if(FacedownCard is IWeapon)
