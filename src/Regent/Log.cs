@@ -40,7 +40,11 @@ namespace Regent
                     if (objValue != null)
                     {
                         Console.ForegroundColor = GetColor(objValue);
-                        Console.Write(objValue.ToString());
+
+                        if(objValue is Chamber && ((Chamber)objValue) != Chamber.Court)
+                            Console.Write(string.Format("{0} Chamber", objValue));
+                        else
+                            Console.Write(objValue.ToString());
                     }
                     c += 2;
                     continue;

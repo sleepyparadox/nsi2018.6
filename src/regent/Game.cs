@@ -102,16 +102,44 @@ namespace Regent
                 foreach (var attack in allAttacks)
                     attackMoves.Remove(attack);
 
-                ResolveAttack(allAttacks);
-                Log.Line();
-                Log.Sleep();
+                if (firstAttack.Chamber == Chamber.Court)
+                {
+                    // First person into Court has to fight off everyone else
+                    var defendingMove = firstAttack;
+                    allAttacks.Remove(firstAttack);
+
+                    // Resolve for other attackers
+                    if (allAttacks.Any())
+                    {
+                        ResolveAttack(allAttacks, defendingMove.Player, defendingMove);
+                        Log.Line();
+                        Log.Sleep();
+                    }
+                }
+                else
+                {
+                    // Attacking in a player chamber
+                    var defendingPlayer = Game.Players[firstAttack.Chamber];
+                    var defendingMove = Game.Moves.FirstOrDefault(m => m.Player == defendingPlayer && m.IsDefendMove());
+                    ResolveAttack(allAttacks, defendingPlayer, defendingMove);
+                    Log.Line();
+                    Log.Sleep();
+                }
             }
 
-            // Didn't do anything step
-            foreach(var defendMove in Moves.Where(m => m.IsDefendMove()))
+            // Was productive in court step
+            if(Moves.Where(m => m.Chamber == Chamber.Court).Count() == 1)
+            {
+                var courtMove = Moves.FirstOrDefault(m => m.Chamber == Chamber.Court);
+                Log.Line("{0} was uninterupted at court", courtMove.Agent);
+                courtMove.Player.DrawCard();
+            }
+
+            // Log about nothing
+            foreach (var defendMove in Moves.Where(m => m.IsDefendMove()))
             {
                 var chamberActvity = Moves.Count(m => m.Chamber == defendMove.Chamber);
-                if(chamberActvity == 1) // alone
+                if (chamberActvity == 1) // alone
                 {
                     Log.Line("Nothing happened in {0}", defendMove.Chamber);
                     Log.Line();
@@ -121,7 +149,7 @@ namespace Regent
             // Game over handling
             if (Active == false)
             {
-                Log.Line("Game over");
+                Log.Line("--- Game over ---");
 
                 if (Players.Values.Any(p => p.Active && p.IsHuman))
                 {
@@ -229,30 +257,19 @@ namespace Regent
 
         public static bool ResolveEvents(PlayerMove move)
         {
-            if (move.Chamber == Chamber.Court)
-            {
-                Log.Line("{0} trades in {1}", move.Agent, move.FacedownCard);
-                Discard(move.FacedownCard);
-                move.Player.DrawCard();
-                move.Player.DrawCard();
-                return true;
-            }
-
             return false;
         }
 
-        static void ResolveAttack(IEnumerable<PlayerMove> attacks)
+        static void ResolveAttack(IEnumerable<PlayerMove> attacks, Player defendingPlayer, PlayerMove defendingMove)
         {
             var primaryAttack = attacks.First();
 
-            var defendingPlayer = Game.Players[primaryAttack.Chamber];
-
+            var defendingChamber = defendingMove != null ? defendingMove.Chamber : defendingPlayer.Chamber;
             foreach (var attack in attacks)
             {
-                Log.Line("{0} with {1} is sneaking into the {2}", attack.Agent, attack.FacedownCard, defendingPlayer);
+                Log.Line("{0} with {1} is sneaking into the {2}", attack.Agent, attack.FacedownCard, defendingChamber);
             }
 
-            var defendingMove = Game.Moves.FirstOrDefault(m => m.Player == defendingPlayer && m.IsDefendMove());
             AgentCard defendingAgent;
             if(defendingMove != null)
                 defendingAgent = defendingMove.Agent;

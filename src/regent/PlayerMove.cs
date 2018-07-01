@@ -24,7 +24,6 @@ namespace Regent
         public bool IsAttackMove()
         {
             return FacedownCard is IWeapon 
-                && Chamber != Chamber.Court
                 && IsDefendMove() == false;
         }
 
