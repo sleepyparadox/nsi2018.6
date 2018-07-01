@@ -41,17 +41,17 @@ namespace Regent
             Hand.Add(card);
             if (IsHuman)
             {
-                Game.Log("{0} draws {1}", this, card);
+                Log.Line("{0} draws {1}", this, card);
             }
             else
             {
-                Game.Log("{0} draws a card", this);
+                Log.Line("{0} draws a card", this);
             }
         }
 
         public override string ToString()
         {
-            return Chamber.ToString();
+            return string.Format("{0} Faction", Chamber);
         }
     }
 }

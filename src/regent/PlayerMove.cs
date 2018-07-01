@@ -38,19 +38,19 @@ namespace Regent
             if (Player.IsHuman)
             {
                 if (IsDefendMove())
-                    Game.Log("(defend) {0} hides inside {1} armed with {2}", Agent, Chamber, FacedownCard);
+                    Log.Line("(defend) {0} hides inside {1} armed with {2}", Agent, Chamber, FacedownCard);
                 else
-                    Game.Log("(attack) {0} waits outside {1} armed with {2}", Agent, Chamber, FacedownCard);
+                    Log.Line("(attack) {0} waits outside {1} armed with {2}", Agent, Chamber, FacedownCard);
             }
             else
             {
                 if (IsDefendMove())
-                    Game.Log("{0} was seen retreating to their {1}", Agent, Chamber);
+                    Log.Line("{0} was seen retreating to their {1}", Agent, Chamber);
                 else
-                    Game.Log("{0} was seen near {1}", Agent, Chamber);
+                    Log.Line("{0} was seen near {1}", Agent, Chamber);
             }
 
-            Game.Sleep();
+            Log.Sleep();
         }
 
         public override string ToString()

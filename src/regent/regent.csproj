@@ -52,6 +52,7 @@
     <Compile Include="Cards\TapReason.cs" />
     <Compile Include="Controls.cs" />
     <Compile Include="InitActions.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="PlayerMove.cs" />
     <Compile Include="Cards\AgentCard.cs" />
     <Compile Include="Cards\ICard.cs" />

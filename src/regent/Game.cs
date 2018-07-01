@@ -17,8 +17,6 @@ namespace Regent
         public static Grammars Grammars;
 
         public static List<PlayerMove> Moves;
-        static bool LoggingEnabled = false;
-        static int LogDelayMs = 1000;
 
         public bool Active { get { return Players.Values.Count(p => p.Active) > 1; } }
 
@@ -32,32 +30,35 @@ namespace Regent
 
             Players = new Dictionary<Chamber, Player>()
             {
-                { Chamber.BlueChamber, new Player(Chamber.BlueChamber, false) },
-                { Chamber.GreenChamber, new Player(Chamber.GreenChamber, false) },
-                { Chamber.RedChamber, new Player(Chamber.RedChamber, true) },
+                { Chamber.Green, new Player(Chamber.Green, false) },
+                { Chamber.Yellow, new Player(Chamber.Yellow, false) },
+                { Chamber.Blue, new Player(Chamber.Blue, true) },
             };
 
-            LoggingEnabled = true;
-            Log("You are playing as {0}", Players.Values.FirstOrDefault(p => p.IsHuman));
-            Log("You must defeat {0}", Players.Values.Where(p => p.IsHuman == false).ToList());
-            Log();
+            Log.LoggingEnabled = true;
+            Log.Line("You are playing as {0}", Players.Values.FirstOrDefault(p => p.IsHuman));
+            foreach (var enemy in Players.Values.Where(p => p.IsHuman == false))
+            {
+                Log.Line("You must defeat {0}", enemy);
+            }
+            Log.Line();
         }
 
         public void Step()
         {
             Day++;
-            Log("Day {0}", Day);
-            Log();
+            Log.Line("--- Day {0} ---", Day);
+            Log.Line();
 
             Moves.Clear();
             foreach(var player in Players.Values.Where(p => p.Active))
             {
                 Moves.Add(StepMainPhase(player));
-                Log();
-                Sleep();
+                Log.Line();
+                Log.Sleep();
             }
 
-            LogLaterThatNight();
+            Log.LaterThatNight();
 
             foreach (var agent in Players.Values.SelectMany(p => p.Agents).Where(a => a.Tapped))
             {
@@ -70,8 +71,8 @@ namespace Regent
                 var @event = events[i];
                 if(ResolveEvents(@event))
                 {
-                    Log();
-                    Sleep();
+                    Log.Line();
+                    Log.Sleep();
                     // this card is done
                     events.Remove(@event);
                 }
@@ -92,8 +93,8 @@ namespace Regent
                     attackMoves.Remove(attack);
 
                 ResolveAttack(allAttacks);
-                Log();
-                Sleep();
+                Log.Line();
+                Log.Sleep();
             }
 
             foreach(var defendMove in Moves.Where(m => m.IsDefendMove()))
@@ -101,23 +102,23 @@ namespace Regent
                 var chamberActvity = Moves.Count(m => m.Chamber == defendMove.Chamber);
                 if(chamberActvity == 1) // alone
                 {
-                    Log("Nothing happened in {0}", defendMove.Chamber);
-                    Log();
+                    Log.Line("Nothing happened in {0}", defendMove.Chamber);
+                    Log.Line();
                 }
             }
 
             if (Active == false)
             {
                 // Game over
-                Log("Game over");
+                Log.Line("Game over");
 
                 if (Players.Values.Any(p => p.Active && p.IsHuman))
                 {
-                    Log("You win");
+                    Log.Line("You win");
                 }
                 else
                 {
-                    Log("You lose");
+                    Log.Line("You lose");
                 }
             }
         }
@@ -131,7 +132,7 @@ namespace Regent
             player.DrawCard();
 
             // Play agents from hand
-            while(true)
+            while (true)
             {
                 var plot = "Plot";
                 var recruit = string.Format("Recruit from hand ({0})", player.Hand.Where(c => c is AgentCard).Count());
@@ -154,29 +155,29 @@ namespace Regent
                     var recruited = Controls.ChooseOne(recruitables, player.IsHuman);
                     player.Hand.Remove(recruited);
                     player.Agents.Add(recruited as AgentCard);
-                    Log("{0} joined the {1} faction", recruited, player);
+                    Log.Line("{0} joined the {1} faction", recruited, player);
                 }
                 else if (choice == inspectChamber && player.IsHuman)
                 {
                     foreach(var card in player.Agents)
                     {
-                        Log("Chamber contains {0}", card);
+                        Log.Line("Chamber contains {0}", card);
                     }
                 }
                 else if (choice == inspectHand && player.IsHuman)
                 {
                     foreach (var card in player.Hand)
                     {
-                        Log("Hand contains {0}", card);
+                        Log.Line("Hand contains {0}", card);
                     }
                 }
                 else if(choice == inspectEnemy)
                 {
                     var enemy = Controls.ChooseOne<Player>(Players.Values.Where(p => p.IsHuman == false).ToArray(), true);
-                    Log("{0} has {1} cards in hand", enemy, player.Hand.Count);
+                    Log.Line("{0} has {1} cards in hand", enemy, player.Hand.Count);
                     foreach (var card in enemy.Agents.Where(a => Moves.Any(m => m.Agent == a) == false))
                     {
-                        Log("{0} contains {1}", enemy, card);
+                        Log.Line("{0} contains {1}", enemy, card);
                     }
                     var enemyMove = Moves.FirstOrDefault(m => m.Player == enemy);
                     if (enemyMove != null)
@@ -191,6 +192,7 @@ namespace Regent
             move.FacedownCard = Controls.ChooseOne(player.Hand, player.IsHuman, "Choose an accomplice:");
             move.Chamber = Controls.ChooseOne(move.Agent.Tapped ? tappedChamber : allChambers, player.IsHuman, "Select a chamber to infiltrate:");
 
+            Log.Line();
             move.LogInitialState();
 
             return move;
@@ -200,7 +202,7 @@ namespace Regent
         {
             if (move.Chamber == Chamber.Court)
             {
-                Log("{0} trades in {1}", move.Agent, move.FacedownCard);
+                Log.Line("{0} trades in {1}", move.Agent, move.FacedownCard);
                 Discard(move.FacedownCard);
                 move.Player.DrawCard();
                 move.Player.DrawCard();
@@ -216,7 +218,10 @@ namespace Regent
 
             var defendingPlayer = Game.Players[primaryAttack.Chamber];
 
-            Log("{0} sneak into the {1}", attacks, defendingPlayer);
+            foreach (var attack in attacks)
+            {
+                Log.Line("{0} with {1} is sneaking into the {2}", attack.Agent, attack.FacedownCard, defendingPlayer);
+            }
 
             var defendingMove = Game.Moves.FirstOrDefault(m => m.Player == defendingPlayer && m.IsDefendMove());
             AgentCard defendingAgent;
@@ -230,11 +235,11 @@ namespace Regent
 
             if (defendingAgent == null)
             {
-                Log("But {0} was empty", defendingPlayer);
+                Log.Line("But {0} was empty", defendingPlayer);
 
                 if(defendingMove != null)
                 {
-                    Log("because {0} is in {1}", defendingMove.Agent, defendingMove.Chamber);
+                    Log.Line("because {0} is in {1}", defendingMove.Agent, defendingMove.Chamber);
                 }
                 return;
             }
@@ -244,42 +249,42 @@ namespace Regent
             if(defendingMove != null)
             {
                 defendingIntruge = defendingMove.GetIntrigue();
-                Log("and find {0}", defendingMove);
+                Log.Line("{0} is waiting and ready", defendingMove);
             }
             else
             {
                 defendingIntruge = defendingAgent.Intrigue;
-                Log("and find {0}", defendingAgent);
+                Log.Line("{0} is suprised", defendingAgent);
             }
 
             DieResult result;
             if (attackingIntrigue > defendingIntruge)
             {
-                Log("The attackers have overwhelming advantage");
+                Log.Line("The attackers have overwhelming advantage");
 
                 // Attacker Choice
                 result = Controls.ChooseOne(new[] { Dice.Roll(), Dice.Roll() }, primaryAttack.Player.IsHuman);
             }
             else if (defendingIntruge > attackingIntrigue)
             {
-                Log("The attackers are under prepared");
+                Log.Line("The attackers are under prepared");
               
                 // Defender Choice
                 result = Controls.ChooseOne(new[] { Dice.Roll(), Dice.Roll() }, defendingPlayer.IsHuman);
             }
             else
             {
-                Log("It is a tense encounter");
+                Log.Line("It is a tense encounter");
                
                 // Tied
                 result = Dice.Roll();
             }
 
-            Sleep();
+            Log.Sleep();
 
             if (result == DieResult.KillTarget)
             {
-                Log("The attackers succeed");
+                Log.Line("The attack succeeds");
 
                 Discard(defendingAgent);
 
@@ -288,7 +293,7 @@ namespace Regent
             }
             else if (result == DieResult.EveryoneDies)
             {
-                Log("Everyone manages to kill themselves");
+                Log.Line("Everyone manages to kill themselves in confusion");
 
                 foreach (var attacker in attacks)
                 {
@@ -301,14 +306,13 @@ namespace Regent
             }
             else if (result == DieResult.InspireFear)
             {
-                Log("{0} survives but is frightened", defendingAgent);
+                Log.Line("The attack discovered but inspires fear", defendingAgent);
 
                 defendingAgent.Tap(TapReason.Frightened);
             }
             else if(result == DieResult.RaiseSuspicion)
             {
-                Log("{0} fail and raise suspicion", attacks);
-
+                Log.Line("The attack discovered and raises suspicion");
                 foreach (var attack in attacks)
                 {
                     attack.Agent.Tap(TapReason.Suspicious);
@@ -316,6 +320,7 @@ namespace Regent
             }
             else if (result == DieResult.DropItem)
             {
+                Log.Line("The attack is discovered and weapons are dropped at scene");
                 foreach (var attacker in attacks)
                 {
                     Discard(attacker.FacedownCard);
@@ -323,6 +328,7 @@ namespace Regent
             }
             else if(result == DieResult.GetHanged)
             {
+                Log.Line("The attack is discovered and the attackers are hanged");
                 foreach (var attacker in attacks)
                 {
                     Discard(attacker.Agent);
@@ -344,7 +350,7 @@ namespace Regent
                 return;
             }
 
-            Log("{0} discarded", card);
+            Log.Line("{0} discarded", card);
 
             foreach(var player in Players.Values)
             {
@@ -371,60 +377,6 @@ namespace Regent
             }
 
             return null;
-        }
-
-        public static void Log()
-        {
-            Log("");
-        }
-
-        public static void Log(object arg)
-        {
-            Log("{0}", arg);
-        }
-
-        public static void Log(string msg, params object[] args)
-        {
-            if (LoggingEnabled == false)
-                return;
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                if(args[i] is IEnumerable)
-                {
-                    var groupString = string.Join(", ", (args[i] as IEnumerable).Cast<object>().Select(o => o.ToString()).ToArray());
-                    var lastComma = groupString.LastIndexOf(',');
-
-                    if(lastComma > 0)
-                    {
-                        groupString = groupString.Substring(0, lastComma)
-                                                + " and"
-                                                + groupString.Substring(lastComma + 1, groupString.Length - (lastComma + 1));
-                    }
-                    
-                    args[i] = groupString;
-                }
-            }
-
-            Console.WriteLine(msg, args);
-        }
-
-        public static void Sleep()
-        {
-            System.Threading.Thread.Sleep(LogDelayMs);
-        }
-
-        void LogLaterThatNight()
-        {
-            Console.Write("Later that night");
-            System.Threading.Thread.Sleep(LogDelayMs);
-            for (int i = 0; i < 3; i++)
-            {
-                Console.Write(".");
-                System.Threading.Thread.Sleep(LogDelayMs/3);
-            }
-            Console.WriteLine();
-            Console.WriteLine();
         }
     }
 }

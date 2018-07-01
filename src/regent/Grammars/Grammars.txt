@@ -1,10 +1,10 @@
 ﻿{"_id": "agent.name.highborn"}
-#agent.name.common.male #title.male of #province
-#agent.name.common.female #title.female of #province
+#title.male of #province
+#title.female of #province
 
 {"_id": "agent.name.lowborn"}
-#agent.name.common.male the #profession.male
-#agent.name.common.female the #profession.female
+#profession.male
+#profession.female
 
 {"_id": "weapon"}
 #race|material|chemical|theme|weapon #weapon.base
@@ -19,7 +19,6 @@ Knife
 Pie
 Pot
 Lute
-
 
 {"_id": "profession.male"}
 Manservent
@@ -65,7 +64,7 @@ Baroness
 Landgrave
 
 {"_id": "province"}
-the #race|material|chemical|theme|weapon #location
+#race|material|chemical|theme|weapon #location
 
 {"_id": "race"}
 Ogre

@@ -33,7 +33,8 @@ namespace Regent
                 bindings.Add(Keys[i], itemArray[i]);
             }
 
-            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
+
             Console.WriteLine(message);
             foreach (var pair in bindings)
             {
