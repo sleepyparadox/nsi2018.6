@@ -311,7 +311,7 @@ namespace Regent
 
             Log.Sleep();
 
-            if (result == DieResult.Defender_Murdered)
+            if (result == DieResult.Target_dies)
             {
                 Log.Line("The attack succeeds");
 
@@ -320,7 +320,7 @@ namespace Regent
                 if (defendingMove != null)
                     Discard(defendingMove.FacedownCard);
             }
-            else if (result == DieResult.Everyone_Dies)
+            else if (result == DieResult.Everyone_dies)
             {
                 Log.Line("Everyone manages to kill themselves in confusion");
 
@@ -333,13 +333,13 @@ namespace Regent
                 if (defendingMove != null)
                     Discard(defendingMove.FacedownCard);
             }
-            else if (result == DieResult.Inspire_Fear)
+            else if (result == DieResult.Inspires_fear)
             {
                 Log.Line("The attack discovered but inspires fear", defendingAgent);
 
                 defendingAgent.Tap(TapReason.Frightened);
             }
-            else if(result == DieResult.Raise_Suspicion)
+            else if(result == DieResult.Raises_suspicion)
             {
                 Log.Line("The attack discovered and raises suspicion");
                 foreach (var attack in attacks)
@@ -347,7 +347,7 @@ namespace Regent
                     attack.Agent.Tap(TapReason.Suspicious);
                 }
             }
-            else if (result == DieResult.Weapon_Dropped)
+            else if (result == DieResult.Weapons_dropped)
             {
                 Log.Line("The attack is discovered and weapons are dropped at scene");
                 foreach (var attacker in attacks)
@@ -355,7 +355,7 @@ namespace Regent
                     Discard(attacker.FacedownCard);
                 }
             }
-            else if(result == DieResult.Attackers_Hanged)
+            else if(result == DieResult.Hang_attackers)
             {
                 Log.Line("The attack is discovered and the attackers are hanged");
                 foreach (var attacker in attacks)

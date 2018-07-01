@@ -40,7 +40,7 @@ namespace Regent
             Console.WriteLine(message);
             foreach (var pair in bindings)
             {
-                Console.WriteLine("[{0}] {1}", pair.Key, pair.Value);
+                Console.WriteLine("[{0}] {1}", pair.Key, pair.Value.ToString().Replace("_", " "));
             }
 
             ConsoleKeyInfo key;
@@ -56,14 +56,14 @@ namespace Regent
             while (bindings.ContainsKey(key.Key) == false);
 
             // clear
-            Console.CursorTop -= bindings.Count;
-            for (int i = 0; i < bindings.Count; i++)
+            Console.CursorTop -= bindings.Count + 2;
+            for (int i = 0; i < bindings.Count + 2; i++)
             {
                 Console.WriteLine(ClearLine); //clear
             }
 
             // write final choice
-            Console.CursorTop -= bindings.Count;
+            Console.CursorTop -= bindings.Count + 2;
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine(">[{0}] {1}", key.Key, bindings[key.Key]);
 
