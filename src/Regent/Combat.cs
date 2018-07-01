@@ -150,16 +150,30 @@ namespace Regent
         static DieResult GetResult(int attackingIntrigue, int defendingIntruge, bool attackerIsHuman, bool defenderIsHuman)
         {
             DieResult result;
-            if (attackingIntrigue > defendingIntruge)
+            if ((attackingIntrigue / 2) >= defendingIntruge)
             {
-                Log.Line("The attackers have overwhelming advantage");
+                Log.Line("The attackers have overhelming advantage");
+
+                // Attacker Choice
+                result = Controls.ChooseOne(new[] { Dice.Roll(), Dice.Roll(), Dice.Roll() }, attackerIsHuman);
+            }
+            else if (attackingIntrigue > defendingIntruge)
+            {
+                Log.Line("The attackers have advantage");
 
                 // Attacker Choice
                 result = Controls.ChooseOne(new[] { Dice.Roll(), Dice.Roll() }, attackerIsHuman);
             }
+            else if ((defendingIntruge / 2) >= attackingIntrigue)
+            {
+                Log.Line("The defenders have overhelming advantage");
+
+                // Defender Choice
+                result = Controls.ChooseOne(new[] { Dice.Roll(), Dice.Roll(), Dice.Roll() }, attackerIsHuman);
+            }
             else if (defendingIntruge > attackingIntrigue)
             {
-                Log.Line("The attackers are under prepared");
+                Log.Line("The defenders have advantage");
 
                 // Defender Choice
                 result = Controls.ChooseOne(new[] { Dice.Roll(), Dice.Roll() }, attackerIsHuman);

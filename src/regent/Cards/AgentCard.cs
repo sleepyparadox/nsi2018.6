@@ -29,7 +29,7 @@ namespace Regent.Cards
         {
             Tapped = true;
             TapReason = reason;
-            Log.Line("{0} is {1} and cannot leave {2}", this, TapReason, Game.GetOwner(this));
+            Log.Line("{0} is {1} and cannot leave {2}", this, TapReason, Game.GetOwner(this).Chamber);
         }
 
         public void Untap()

@@ -8,7 +8,7 @@ namespace Regent
 {
     public static class Controls
     {
-        const string ClearLine = "                                                   ";
+        const string ClearLine = "                                                                                                      ";
         public static DieResult ChooseOne(IEnumerable<DieResult> items, bool isHuman, string message = "Choose one:")
         {
             if(isHuman)
@@ -29,7 +29,7 @@ namespace Regent
             }
 
             var bindings = new Dictionary<ConsoleKey, T>();
-            for (int i = 0; i < itemArray.Length; i++)
+            for (int i = 0; i < itemArray.Length && i < Keys.Count; i++)
             {
                 bindings.Add(Keys[i], itemArray[i]);
             }
