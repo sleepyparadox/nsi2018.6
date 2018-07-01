@@ -29,24 +29,24 @@ namespace Regent
                 new AgentCard(true),
                 new AgentCard(false),
             };
-            DrawCard();
-            DrawCard();
-            DrawCard();
-            DrawCard();
+            DrawCard(false);
+            DrawCard(false);
+            DrawCard(false);
+            DrawCard(false);
         }
 
-        public void DrawCard()
+        public void DrawCard(bool log = true)
         {
             var card = Game.Deck.DrawCard();
             Hand.Add(card);
+
+            if (log == false)
+                return;
+
             if (IsHuman)
-            {
                 Log.Line("{0} draws {1}", this, card);
-            }
             else
-            {
                 Log.Line("{0} draws a card", this);
-            }
         }
 
         public override string ToString()

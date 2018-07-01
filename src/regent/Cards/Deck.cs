@@ -13,7 +13,7 @@ namespace Regent.Cards
             var cardType = Game.Rand.NextInt(0, 100);
 
             ICard card;
-            if(cardType < 40)
+            if(cardType < 20)
             {
                 var highborn = Game.Rand.NextInt(0, 100) >= 80;
                 card = new AgentCard(highborn);

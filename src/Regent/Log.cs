@@ -10,7 +10,7 @@ namespace Regent
 {
     public static class Log
     {
-        public static bool LoggingEnabled { get; set; }
+        public static bool LoggingEnabled { get { return true; } }
         public static int LogDelayMs = 1000;
         public static void Line()
         {
@@ -112,8 +112,11 @@ namespace Regent
         {
             { Chamber.Court, ConsoleColor.White },
             { Chamber.Silver, ConsoleColor.Cyan },
-            { Chamber.Your, ConsoleColor.Green },
             { Chamber.Gold, ConsoleColor.Yellow },
+            { Chamber.Green, ConsoleColor.Green },
+            { Chamber.Red, ConsoleColor.Red },
+            { Chamber.Magenta, ConsoleColor.Magenta },
+            { Chamber.Your, ConsoleColor.Green },
         };
     }
 }

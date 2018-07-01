@@ -32,16 +32,33 @@ namespace Regent
             {
                 { Chamber.Gold, new Player(Chamber.Gold, false) },
                 { Chamber.Silver, new Player(Chamber.Silver, false) },
-                { Chamber.Your, new Player(Chamber.Your, true) },
             };
 
-            Log.LoggingEnabled = true;
-            Log.Line("You are playing as {0}", Players.Values.FirstOrDefault(p => p.IsHuman));
-            foreach (var enemy in Players.Values.Where(p => p.IsHuman == false))
+            var play = "Play";
+            var montage = "Montage";
+            var choice = Controls.ChooseOne(new string[] { play, montage }, true);
+
+            if (choice == play)
             {
-                Log.Line("You must defeat {0}", enemy);
+                // Play as Human
+                Players.Add(Chamber.Your, new Player(Chamber.Your, true));
+
+                Log.Line("You are playing as {0}", Players.Values.FirstOrDefault(p => p.IsHuman));
+                foreach (var enemy in Players.Values.Where(p => p.IsHuman == false))
+                {
+                    Log.Line("You must defeat {0}", enemy);
+                }
+                Log.Line();
             }
-            Log.Line();
+            else
+            {
+                // Montage of Bot
+                Players.Add(Chamber.Green, new Player(Chamber.Green, false));
+                Players.Add(Chamber.Red, new Player(Chamber.Red, false));
+                Players.Add(Chamber.Magenta, new Player(Chamber.Magenta, false));
+
+                Log.LogDelayMs = 100;
+            }
         }
 
         public void Step()
@@ -133,7 +150,7 @@ namespace Regent
 
         static PlayerMove StepMainPhase(Player player)
         {
-            var allChambers = Players.Keys.ToList();
+            var allChambers = Players.Values.Where(p => p.Active).Select(p => p.Chamber).ToList();
             allChambers.Insert(0, Chamber.Court);
             var tappedChamber = new List<Chamber>() { player.Chamber };
 

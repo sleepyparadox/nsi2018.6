@@ -11,6 +11,9 @@ namespace Regent
         Court,
         Gold,
         Silver,
+        Green,
+        Red,
+        Magenta,
         Your,
     }
 }
