@@ -22,19 +22,31 @@ namespace Regent
         {
             Chamber = chamber;
             IsHuman = isPlayer;
+            Hand = new List<ICard>();
+            Discards = new List<ICard>();
             Agents = new List<AgentCard>()
             {
                 new AgentCard(true),
                 new AgentCard(false),
             };
-            Hand = new List<ICard>()
+            DrawCard();
+            DrawCard();
+            DrawCard();
+            DrawCard();
+        }
+
+        public void DrawCard()
+        {
+            var card = Game.Deck.DrawCard();
+            Hand.Add(card);
+            if (IsHuman)
             {
-                Game.Deck.DrawCard(this),
-                Game.Deck.DrawCard(this),
-                Game.Deck.DrawCard(this),
-                Game.Deck.DrawCard(this),
-            };
-            Discards = new List<ICard>();
+                Game.Log("{0} draws {1}", this, card);
+            }
+            else
+            {
+                Game.Log("{0} draws a card", this);
+            }
         }
 
         public override string ToString()

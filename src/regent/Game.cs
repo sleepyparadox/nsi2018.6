@@ -32,9 +32,9 @@ namespace Regent
 
             Players = new Dictionary<Chamber, Player>()
             {
-                { Chamber.Blue, new Player(Chamber.Blue, false) },
-                { Chamber.Green, new Player(Chamber.Green, false) },
-                { Chamber.Red, new Player(Chamber.Red, true) },
+                { Chamber.BlueChamber, new Player(Chamber.BlueChamber, false) },
+                { Chamber.GreenChamber, new Player(Chamber.GreenChamber, false) },
+                { Chamber.RedChamber, new Player(Chamber.RedChamber, true) },
             };
 
             LoggingEnabled = true;
@@ -128,8 +128,7 @@ namespace Regent
             allChambers.Insert(0, Chamber.Court);
             var tappedChamber = new List<Chamber>() { player.Chamber };
 
-            var facedown = Deck.DrawCard(player);
-            player.Hand.Add(facedown);
+            player.DrawCard();
 
             // Play agents from hand
             while(true)
@@ -203,8 +202,8 @@ namespace Regent
             {
                 Log("{0} trades in {1}", move.Agent, move.FacedownCard);
                 Discard(move.FacedownCard);
-                move.Player.Hand.Add(Deck.DrawCard(move.Player));
-                move.Player.Hand.Add(Deck.DrawCard(move.Player));
+                move.Player.DrawCard();
+                move.Player.DrawCard();
                 return true;
             }
 

@@ -8,7 +8,7 @@ namespace Regent.Cards
 {
     public class Deck
     {
-        public ICard DrawCard(Player player)
+        public ICard DrawCard()
         {
             var cardType = Game.Rand.NextInt(0, 100);
 
@@ -21,16 +21,6 @@ namespace Regent.Cards
             else
             {
                 card = new WeaponCard();
-            }
-
-
-            if(player.IsHuman)
-            {
-                Game.Log("{0} draws {1}", player, card);
-            }
-            else
-            {
-                Game.Log("{0} draws a card", player);
             }
 
             return card;
