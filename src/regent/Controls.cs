@@ -8,6 +8,7 @@ namespace Regent
 {
     public static class Controls
     {
+        const string ClearLine = "                                                   ";
         public static DieResult ChooseOne(IEnumerable<DieResult> items, bool isHuman, string message = "Choose one:")
         {
             if(isHuman)
@@ -35,6 +36,7 @@ namespace Regent
 
             Console.ForegroundColor = ConsoleColor.White;
 
+            Console.WriteLine();
             Console.WriteLine(message);
             foreach (var pair in bindings)
             {
@@ -45,12 +47,29 @@ namespace Regent
             do
             {
                 key = Console.ReadKey();
-                Console.WriteLine(); //clear
+
+                // clear last character
+                Console.CursorLeft -= 1;
+                Console.Write(' ');
+                Console.CursorLeft -= 1;
             }
             while (bindings.ContainsKey(key.Key) == false);
 
+            // clear
+            Console.CursorTop -= bindings.Count;
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                Console.WriteLine(ClearLine); //clear
+            }
+
+            // write final choice
+            Console.CursorTop -= bindings.Count;
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine(">[{0}] {1}", key.Key, bindings[key.Key]);
+
             return bindings[key.Key];
         }
+
 
         static List<ConsoleKey> Keys = new List<ConsoleKey>()
         {
@@ -66,6 +85,10 @@ namespace Regent
             ConsoleKey.D,
             ConsoleKey.F,
             ConsoleKey.G,
+            ConsoleKey.H,
+            ConsoleKey.J,
+            ConsoleKey.K,
+            ConsoleKey.L,
         };
     }
 }

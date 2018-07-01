@@ -50,9 +50,11 @@ namespace Regent
             Log.Line("--- Day {0} ---", Day);
             Log.Line();
 
+            // Main step
             Moves.Clear();
             foreach(var player in Players.Values.Where(p => p.Active))
             {
+                Log.Line("{0} has {1} agents", player, player.Agents.Count);
                 Moves.Add(StepMainPhase(player));
                 Log.Line();
                 Log.Sleep();
@@ -60,11 +62,18 @@ namespace Regent
 
             Log.LaterThatNight();
 
-            foreach (var agent in Players.Values.SelectMany(p => p.Agents).Where(a => a.Tapped))
+            // Untap step
+            var tappedAgents = Players.Values.SelectMany(p => p.Agents).Where(a => a.Tapped).ToList();
+            if (tappedAgents.Any())
             {
-                agent.Untap();
+                foreach (var agent in tappedAgents)
+                {
+                    agent.Untap();
+                }
+                Log.Line();
             }
-
+             
+            // Event step
             var events = Moves.ToList();
             for (int i = 0; i < events.Count;)
             {
@@ -84,6 +93,7 @@ namespace Regent
 
             }
 
+            // Combat step
             var attackMoves = Moves.Where(m => m.IsAttackMove()).ToList();
             while(attackMoves.Any())
             {
@@ -97,6 +107,7 @@ namespace Regent
                 Log.Sleep();
             }
 
+            // Didn't do anything step
             foreach(var defendMove in Moves.Where(m => m.IsDefendMove()))
             {
                 var chamberActvity = Moves.Count(m => m.Chamber == defendMove.Chamber);
@@ -107,9 +118,9 @@ namespace Regent
                 }
             }
 
+            // Game over handling
             if (Active == false)
             {
-                // Game over
                 Log.Line("Game over");
 
                 if (Players.Values.Any(p => p.Active && p.IsHuman))
@@ -151,7 +162,7 @@ namespace Regent
                     var recruited = Controls.ChooseOne(recruitables, player.IsHuman);
                     player.Hand.Remove(recruited);
                     player.Agents.Add(recruited as AgentCard);
-                    Log.Line("{0} joined the {1} faction", recruited, player);
+                    Log.Line("{0} puts {1} into play", recruited, player);
                 }
                 else if (choice == inspect && player.IsHuman)
                 {
@@ -207,7 +218,7 @@ namespace Regent
             var move = new PlayerMove();
             move.Player = player;
             move.Agent = Controls.ChooseOne(player.Agents, player.IsHuman, "Choose an agent:");
-            move.FacedownCard = Controls.ChooseOne(player.Hand, player.IsHuman, "Choose an accomplice:");
+            move.FacedownCard = Controls.ChooseOne(player.Hand, player.IsHuman, "Choose an item:");
             move.Chamber = Controls.ChooseOne(move.Agent.Tapped ? tappedChamber : allChambers, player.IsHuman, "Select a chamber to infiltrate:");
 
             Log.Line();
@@ -300,7 +311,7 @@ namespace Regent
 
             Log.Sleep();
 
-            if (result == DieResult.KillTarget)
+            if (result == DieResult.Defender_Murdered)
             {
                 Log.Line("The attack succeeds");
 
@@ -309,7 +320,7 @@ namespace Regent
                 if (defendingMove != null)
                     Discard(defendingMove.FacedownCard);
             }
-            else if (result == DieResult.EveryoneDies)
+            else if (result == DieResult.Everyone_Dies)
             {
                 Log.Line("Everyone manages to kill themselves in confusion");
 
@@ -322,13 +333,13 @@ namespace Regent
                 if (defendingMove != null)
                     Discard(defendingMove.FacedownCard);
             }
-            else if (result == DieResult.InspireFear)
+            else if (result == DieResult.Inspire_Fear)
             {
                 Log.Line("The attack discovered but inspires fear", defendingAgent);
 
                 defendingAgent.Tap(TapReason.Frightened);
             }
-            else if(result == DieResult.RaiseSuspicion)
+            else if(result == DieResult.Raise_Suspicion)
             {
                 Log.Line("The attack discovered and raises suspicion");
                 foreach (var attack in attacks)
@@ -336,7 +347,7 @@ namespace Regent
                     attack.Agent.Tap(TapReason.Suspicious);
                 }
             }
-            else if (result == DieResult.DropItem)
+            else if (result == DieResult.Weapon_Dropped)
             {
                 Log.Line("The attack is discovered and weapons are dropped at scene");
                 foreach (var attacker in attacks)
@@ -344,7 +355,7 @@ namespace Regent
                     Discard(attacker.FacedownCard);
                 }
             }
-            else if(result == DieResult.GetHanged)
+            else if(result == DieResult.Attackers_Hanged)
             {
                 Log.Line("The attack is discovered and the attackers are hanged");
                 foreach (var attacker in attacks)
