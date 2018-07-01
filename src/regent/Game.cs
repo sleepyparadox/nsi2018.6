@@ -136,13 +136,9 @@ namespace Regent
             {
                 var plot = "Plot";
                 var recruit = string.Format("Recruit from hand ({0})", player.Hand.Where(c => c is AgentCard).Count());
-                var inspectChamber = string.Format("Inspect Chamber ({0})", player.Agents.Count);
-                var inspectHand = string.Format("Inspect Hand ({0})", player.Hand.Count);
-                var inspectEnemy = string.Format("Inspect Enemy Chamber");
-
-                var choices = new List<string>(){ plot, recruit, inspectChamber, inspectHand};
-                if (player.IsHuman)
-                    choices.Add(inspectEnemy);
+                var inspect = "Inspect";
+                
+                var choices = new List<string>(){ plot, recruit, inspect};
 
                 var choice = Controls.ChooseOne(choices, player.IsHuman);
 
@@ -157,31 +153,53 @@ namespace Regent
                     player.Agents.Add(recruited as AgentCard);
                     Log.Line("{0} joined the {1} faction", recruited, player);
                 }
-                else if (choice == inspectChamber && player.IsHuman)
+                else if (choice == inspect && player.IsHuman)
                 {
-                    foreach(var card in player.Agents)
+                    var inspectHand = string.Format("Your hand ({0})", player.Hand.Count);
+                    var inspectMoves = string.Format("Recent Activity ({0})", Moves.Count);
+
+                    var inspectTargets = new List<object> { inspectHand, inspectMoves };
+                    inspectTargets.AddRange(Players.Values);
+
+                    var inspectChoice = Controls.ChooseOne(inspectTargets, true);
+
+                    if(inspectChoice is string && (string)inspectChoice == inspectHand)
                     {
-                        Log.Line("Chamber contains {0}", card);
+                        foreach (var card in player.Hand)
+                        {
+                            Log.Line("Your hand contains {0}", card);
+                        }
                     }
-                }
-                else if (choice == inspectHand && player.IsHuman)
-                {
-                    foreach (var card in player.Hand)
+                    else if (inspectChoice is string && (string)inspectChoice == inspectMoves)
                     {
-                        Log.Line("Hand contains {0}", card);
+                        foreach (var m in Moves)
+                        {
+                            m.LogInitialState();
+                        }
                     }
-                }
-                else if(choice == inspectEnemy)
-                {
-                    var enemy = Controls.ChooseOne<Player>(Players.Values.Where(p => p.IsHuman == false).ToArray(), true);
-                    Log.Line("{0} has {1} cards in hand", enemy, player.Hand.Count);
-                    foreach (var card in enemy.Agents.Where(a => Moves.Any(m => m.Agent == a) == false))
+                    else if(inspectChoice is Player)
                     {
-                        Log.Line("{0} contains {1}", enemy, card);
+                        var inspectPlayer = inspectChoice as Player;
+
+                        if(inspectPlayer.IsHuman == false)
+                            Log.Line("{0} has {1} cards in hand", inspectPlayer, player.Hand.Count);
+                        var inspectChamber = inspectPlayer.Agents.Where(a => Moves.Any(m => m.Agent == a) == false).ToList();
+                        Log.Line("In the chamber ({0}):", inspectChamber.Count);
+                        foreach (var card in inspectChamber)
+                        {
+                            Log.Line("{0}", card);
+                        }
+                        Log.Line("Activity:");
+                        var inspectMove = Moves.FirstOrDefault(m => m.Player == inspectPlayer);
+                        if(inspectMove != null)
+                        {
+                            inspectMove.LogInitialState();
+                        }
+                        else
+                        {
+                            Log.Line("(none)");
+                        }
                     }
-                    var enemyMove = Moves.FirstOrDefault(m => m.Player == enemy);
-                    if (enemyMove != null)
-                        enemyMove.LogInitialState();
                 }
             }
       

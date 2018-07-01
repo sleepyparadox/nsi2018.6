@@ -7,7 +7,7 @@
 #profession.female
 
 {"_id": "weapon"}
-#race|material|chemical|theme|weapon #weapon.base
+#race|material|chemical|theme #weapon.base
 
 {"_id": "weapon.base"}
 Sword
@@ -64,7 +64,7 @@ Baroness
 Landgrave
 
 {"_id": "province"}
-#race|material|chemical|theme|weapon #location
+#race|material|chemical|theme #location
 
 {"_id": "race"}
 Ogre
