@@ -50,9 +50,14 @@ namespace Regent.Cards
                 return string.Format("{0} (+{2} intrigue{3})", Name, owner, Intrigue, tappedReason);
         }
 
-        public bool GetIsUsed()
+        public bool IsUsedByMove()
         {
             return Game.Moves.Any(m => m.Agent == this);
+        }
+
+        public bool IsInChamber()
+        {
+            return IsUsedByMove() == false && Game.GetOwner(this) != null;
         }
     }
 }
