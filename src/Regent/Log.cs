@@ -44,6 +44,9 @@ namespace Regent
                         if(objValue is Chamber && ((Chamber)objValue) != Chamber.Court)
                             Console.Write(string.Format("{0} Chamber", objValue));
                         else
+                            if (objValue is DieResult)
+                            Console.Write(string.Format("{0}", objValue.ToString().Replace("_", " ")));
+                        else
                             Console.Write(objValue.ToString());
                     }
                     c += 2;
@@ -108,10 +111,9 @@ namespace Regent
         static Dictionary<Chamber, ConsoleColor> ChamberColors = new Dictionary<Chamber, ConsoleColor>()
         {
             { Chamber.Court, ConsoleColor.White },
-            { Chamber.Red, ConsoleColor.Red },
-            { Chamber.Blue, ConsoleColor.Blue },
-            { Chamber.Green, ConsoleColor.Green },
-            { Chamber.Yellow, ConsoleColor.Yellow },
+            { Chamber.Silver, ConsoleColor.Cyan },
+            { Chamber.Your, ConsoleColor.Green },
+            { Chamber.Gold, ConsoleColor.Yellow },
         };
     }
 }

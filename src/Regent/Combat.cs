@@ -49,11 +49,10 @@ namespace Regent
                 }
 
                 // Run the numbers
-
                 var attackingIntrigue = attackingMoves.Sum(a => a.GetIntrigue());
                 int defendingIntruge;
 
-                if(defendingMove != null)
+                if (defendingMove != null)
                 {
                     // prepared
                     defendingIntruge = defendingMove.GetIntrigue();
@@ -75,7 +74,10 @@ namespace Regent
                 }
 
                 // Result
-                var result = GetResult(attackingIntrigue, defendingIntruge, attackingMoves.First().Player.IsHuman, Game.GetOwner(defendingAgent).IsHuman);
+                var attackerIsHuman = attackingMoves.First().Player.IsHuman;
+                var defenderIsHuman = Game.GetOwner(defendingAgent).IsHuman;
+
+                var result = GetResult(attackingIntrigue, defendingIntruge, attackerIsHuman, defenderIsHuman);
 
                 if (result == DieResult.Target_dies)
                 {
@@ -130,6 +132,14 @@ namespace Regent
                         Game.Discard(attackMove.FacedownCard);
                     }
                 }
+
+                //// Request key press if player didn't do anything
+                //var hadInput = (attackingIntrigue > defendingIntruge && attackerIsHuman)
+                //                || (defendingIntruge > attackingIntrigue && defenderIsHuman);
+                //if (hadInput == false)
+                //{
+                //    Controls.PressAnyKey();
+                //}
 
                 // finished
                 Log.Line();

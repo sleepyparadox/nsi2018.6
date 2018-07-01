@@ -40,7 +40,7 @@ namespace Regent
             Console.WriteLine(message);
             foreach (var pair in bindings)
             {
-                Console.WriteLine("[{0}] {1}", pair.Key, pair.Value.ToString().Replace("_", " "));
+                Log.Line("[{0}] {1}", pair.Key, pair.Value);
             }
 
             ConsoleKeyInfo key;
@@ -70,6 +70,18 @@ namespace Regent
             return bindings[key.Key];
         }
 
+        public static void PressAnyKey()
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Press any key");
+            Console.ReadKey();
+
+            // clear
+            Console.CursorTop -= 1;
+            Console.CursorLeft -= 1;
+            Console.WriteLine(ClearLine); //clear
+            Console.CursorTop -= 1;
+        }
 
         static List<ConsoleKey> Keys = new List<ConsoleKey>()
         {

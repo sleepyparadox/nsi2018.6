@@ -30,9 +30,9 @@ namespace Regent
 
             Players = new Dictionary<Chamber, Player>()
             {
-                { Chamber.Green, new Player(Chamber.Green, false) },
-                { Chamber.Yellow, new Player(Chamber.Yellow, false) },
-                { Chamber.Blue, new Player(Chamber.Blue, true) },
+                { Chamber.Gold, new Player(Chamber.Gold, false) },
+                { Chamber.Silver, new Player(Chamber.Silver, false) },
+                { Chamber.Your, new Player(Chamber.Your, true) },
             };
 
             Log.LoggingEnabled = true;
@@ -96,6 +96,14 @@ namespace Regent
             // Combat step
             Combat.Resolve();
 
+            // Was productive in court step
+            if (Moves.Where(m => m.Chamber == Chamber.Court).Count() == 1)
+            {
+                var courtMove = Moves.FirstOrDefault(m => m.Chamber == Chamber.Court);
+                Log.Line("{0} was productive at court", courtMove.Agent);
+                courtMove.Player.DrawCard();
+            }
+
             // Log about nothing
             foreach (var defendMove in Moves.Where(m => m.IsDefendMove()))
             {
@@ -151,7 +159,7 @@ namespace Regent
                     var recruited = Controls.ChooseOne(recruitables, player.IsHuman);
                     player.Hand.Remove(recruited);
                     player.Agents.Add(recruited as AgentCard);
-                    Log.Line("{0} puts {1} into play", recruited, player);
+                    Log.Line("{0} puts {1} into play", player, recruited);
                 }
                 else if (choice == inspect && player.IsHuman)
                 {
